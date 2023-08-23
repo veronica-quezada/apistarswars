@@ -1,54 +1,59 @@
 const URL_BASE = "https://swapi.dev/api/";
-const URL_PEOPLE = URL_BASE + "/people/";
+const URL_PEOPLE = URL_BASE + "people/";
+
+async function fetchData(URL_PEOPLE) {
+    try {
+        const response = await fetch(URL_PEOPLE);
+        const data = await response.json();
+        console.log(data)
+        return data;
+    } catch (error) {
+        console.error('Error al obtener datos:', error);
+    }
+}
+
+async function fetchPeopleData() {
+    const peopleData = await fetchData(URL_PEOPLE);
+    return peopleData.results;
+}
+
+async function init() {
+    const spinner = document.getElementById("spinner");
+    const contenido = document.getElementById("contenido");
+
+    spinner.style.display = "block";
+    contenido.style.display = "none";
+    try {
+        const people = await fetchPeopleData();
+        tabla(people);
+        tarjeta(people);
+    } catch (error) {
+        console.error('Error al cargar la data:', error);
+    } finally {
+        spinner.style.display = "none";
+        contenido.style.display = "block";
+    }
+}
+
 let contenido = document.getElementById("contenido");
-let carta;
 
 function tabla(datos) {
     console.log("contenido:", contenido);
     contenido.innerHTML = "";
-
     for (let temp of datos) {
-        console.log("temp:", temp);
-        contenido.innerHTML += `<tr>
-            <th scope="row">${temp.name}</ th> 
-            <td><img width="80px" height="80px" src="${temp.img}"></td> 
-            <td>${temp.level}</td>
-        </tr> `;
-        if (temp.id == 10) {
-            break;
-        }
+        contenido.innerHTML += `
+        <div class="card" style="width: 15rem;">
+            <div class="card-body">
+                <h5 class="card-title">${temp.name}</h5>
+                <div style="display:flex; flex-direction:column;">
+                    <p class="card-text">Estatura: ${temp.height}</p>
+                    <p class="card-text">Peso: ${temp.mass}</p>
+                </div>
+            </div>
+        </div>
+        `;
     }
 }
 
-function tarjeta(data) {
-    carta.innerHTML = "";
-    for (let temp of data) {
-        carta.innerHTML += ` 
-      <div id="tarjSola" class="card mb-3 container" style="max-width: 540px;">
-<div class="row g-0">
-  <div class="col-md-4">
-    <img src="${temp.img}" class="img-fluid rounded-start" alt="...">
-  </div>
-  <div class="col-md-8">
-    <div class="card-body">
-      <h5 class="card-title">"NOMBRE: ${temp.people}"</h5>
-      <p class="card-text">ESTATURA: "${temp.estatura}"</p>
-     </div>
-  </div>
-</div>
-</div>
- `;
-    }
-}
 
-$(document).ready(function () {
-    contenido = document.getElementById("contenido");
-    carta = document.getElementById("carta");
-
-    fetch(URL_PEOPLE)
-        .then((response) => response.json())
-        .then((datos) => {
-            console.log(datos);
-            tabla(datos.results);
-        });
-});
+document.addEventListener('DOMContentLoaded', init);
